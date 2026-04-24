@@ -19,6 +19,42 @@ public class GameManager : MonoBehaviour
     private VisualElement m_GameOverPanel;
     private Label m_GameOverMessage;
 
+    public int baseWidth = 8;
+    public int baseHeight = 8;
+    public int sizeIncreasePerLevel = 2;
+
+    public int baseFood = 6;
+    public int baseWalls = 6;
+    public int baseEnemies = 1;
+
+    public int foodDecreasePerLevel = 1;
+    public int enemyIncreasePerLevel = 1;
+    public int wallIncreasePerLevel = 1;
+
+    public Camera MainCamera;
+
+    void UpdateCameraSize()
+    {
+        float size = Mathf.Max(BoardManager.Width, BoardManager.Height) * 0.6f;
+        MainCamera.orthographicSize = Mathf.Clamp(size, 4f, 12f);
+    }
+
+
+    public int GetFoodCount()
+    {
+        return Mathf.Max(1, baseFood - (m_CurrentLevel * foodDecreasePerLevel));
+    }
+
+    public int GetWallCount()
+    {
+        return baseWalls + (m_CurrentLevel * wallIncreasePerLevel);
+    }
+
+    public int GetEnemyCount()
+    {
+        return baseEnemies + (m_CurrentLevel * enemyIncreasePerLevel);
+    }
+
    private void Awake()
    {
        if (Instance != null)
@@ -46,10 +82,20 @@ public class GameManager : MonoBehaviour
     public void NewLevel()
     {
     BoardManager.Clean();
-    BoardManager.Init();
+    int width = baseWidth + (m_CurrentLevel * sizeIncreasePerLevel);
+    int height = baseHeight + (m_CurrentLevel * sizeIncreasePerLevel);
+
+    BoardManager.Init(
+        width,
+        height,
+        GetFoodCount(),
+        GetWallCount(),
+        GetEnemyCount()
+    );
     PlayerController.Spawn(BoardManager, new Vector2Int(1,1));
 
     m_CurrentLevel++;
+    UpdateCameraSize();
     }
    void OnTurnHappen()
     {
@@ -82,9 +128,27 @@ public class GameManager : MonoBehaviour
     m_FoodLabel.text = "Food : " + m_FoodAmount;
     
     BoardManager.Clean();
-    BoardManager.Init();
+    int width = baseWidth + (m_CurrentLevel * sizeIncreasePerLevel);
+    int height = baseHeight + (m_CurrentLevel * sizeIncreasePerLevel);
+
+    BoardManager.Init(
+        width,
+        height,
+        GetFoodCount(),
+        GetWallCount(),
+        GetEnemyCount()
+    );
     
     PlayerController.Init();
-    PlayerController.Spawn(BoardManager, new Vector2Int(1,1));
+    //PlayerController.Spawn(BoardManager, new Vector2Int(1,1));
+    Vector2Int spawn = new Vector2Int(1, 1);
+    PlayerController.Spawn(BoardManager, spawn);
+    UpdateCameraSize();
+    }
+
+
+    public int GetLevel()
+    {
+        return m_CurrentLevel;
     }
 }

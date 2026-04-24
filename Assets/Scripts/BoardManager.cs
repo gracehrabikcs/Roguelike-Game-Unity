@@ -16,8 +16,10 @@ public class BoardManager : MonoBehaviour
    private Tilemap m_Tilemap;
    private Grid m_Grid;
   
-   public int Width;
-   public int Height;
+//    public int Width;
+//    public int Height;
+    public int Width { get; private set; }
+    public int Height { get; private set; }
    public Tile[] GroundTiles;
    public Tile[] WallTiles;
    public FoodObject FoodPrefab;
@@ -26,8 +28,11 @@ public class BoardManager : MonoBehaviour
    public ExitCellObject ExitCellPrefab;
    public Enemy EnemyPrefab;
 
-    public void Init()
+    public void Init(int width, int height, int foodCount, int wallCount, int enemyCount)
     {
+
+    Width = width;
+    Height = height;
     m_Tilemap = GetComponentInChildren<Tilemap>();
     m_Grid = GetComponentInChildren<Grid>();
     //Initialize the list
@@ -68,11 +73,22 @@ public class BoardManager : MonoBehaviour
     AddObject(Instantiate(ExitCellPrefab), endCoord);
     m_EmptyCellsList.Remove(endCoord);
 
-    Vector2Int coord = new Vector2Int(3, 3); // temp test position
-    AddObject(Instantiate(EnemyPrefab), coord);
+    // Vector2Int coord = new Vector2Int(3, 3); // temp test position
+    // AddObject(Instantiate(EnemyPrefab), coord);
 
-    GenerateWall();
-    GenerateFood();
+    for (int i = 0; i < enemyCount; i++)
+    {
+        int randomIndex = Random.Range(0, m_EmptyCellsList.Count);
+        Vector2Int coord = m_EmptyCellsList[randomIndex];
+
+        m_EmptyCellsList.RemoveAt(randomIndex);
+        Enemy newEnemy = Instantiate(EnemyPrefab);
+        newEnemy.Damage = 1 + (GameManager.Instance.GetLevel() / 5);
+        AddObject(newEnemy, coord);
+    }
+
+    GenerateWall(wallCount);
+    GenerateFood(foodCount);
     }
 
    public Vector3 CellToWorld(Vector2Int cellIndex)
@@ -92,9 +108,9 @@ public class BoardManager : MonoBehaviour
    }
 
 
-    void GenerateFood()
+    void GenerateFood(int foodCount)
     {
-    int foodCount = 5;
+    //int foodCount = 5;
     for (int i = 0; i < foodCount; ++i)
     {
         int randomIndex = Random.Range(0, m_EmptyCellsList.Count);
@@ -106,9 +122,9 @@ public class BoardManager : MonoBehaviour
     }
     }
 
-    void GenerateWall()
+    void GenerateWall(int wallCount)
     {
-    int wallCount = Random.Range(6, 10);
+    //int wallCount = Random.Range(6, 10);
     for (int i = 0; i < wallCount; ++i)
     {
         int randomIndex = Random.Range(0, m_EmptyCellsList.Count);

@@ -3,6 +3,7 @@ using UnityEngine;
 public class Enemy : CellObject
 {
    public int Health = 3;
+   public int Damage = 3;
   
    private int m_CurrentHealth;
 
@@ -73,7 +74,7 @@ public class Enemy : CellObject
           || (yDist == 0 && absXDist == 1))
       {
           //we are adjacent to the player, attack!
-          GameManager.Instance.ChangeFood(-3);
+        GameManager.Instance.ChangeFood(-Damage);
       }
       else
       {
