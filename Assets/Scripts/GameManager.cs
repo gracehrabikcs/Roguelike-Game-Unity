@@ -45,6 +45,7 @@ public class GameManager : MonoBehaviour
     private Button m_ResumeButton;
     private Button m_MainMenuButton;
     private Button m_PauseQuitButton;
+    private Label m_LevelLabel;
 
     private bool m_IsPaused;
     public bool IsPaused => m_IsPaused;
@@ -139,6 +140,7 @@ public class GameManager : MonoBehaviour
         m_FoodLabel = root.Q<Label>("FoodLabel");
         m_StrengthLabel = root.Q<Label>("StrengthLabel");
         m_GameOverMessage = m_GameOverPanel.Q<Label>("GameOverMessage");
+        m_LevelLabel = root.Q<Label>("LevelLabel");
 
         // =========================
         // BUTTONS (MAIN MENU)
@@ -203,6 +205,7 @@ public class GameManager : MonoBehaviour
     PlayerController.Spawn(BoardManager, new Vector2Int(1,1));
 
     m_CurrentLevel++;
+    UpdateLevelUI();
     UpdateCameraSize();
     }
    void OnTurnHappen()
@@ -220,6 +223,12 @@ public class GameManager : MonoBehaviour
         m_GameOverPanel.style.display = DisplayStyle.None;
 
         StartNewGame();
+    }
+
+    void UpdateLevelUI()
+    {
+        if (m_LevelLabel != null)
+            m_LevelLabel.text = "Level: " + m_CurrentLevel;
     }
 
     void OnQuitClicked()
@@ -283,6 +292,7 @@ public class GameManager : MonoBehaviour
     //PlayerController.Spawn(BoardManager, new Vector2Int(1,1));
     Vector2Int spawn = new Vector2Int(1, 1);
     PlayerController.Spawn(BoardManager, spawn);
+    UpdateLevelUI();
     UpdateStatsUI();
     UpdateCameraSize();
     }
