@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UIElements;
+using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
@@ -40,6 +41,14 @@ public class GameManager : MonoBehaviour
     private Button m_QuitButton;
     private VisualElement m_HUD;
 
+    private VisualElement m_PauseMenu;
+    private Button m_ResumeButton;
+    private Button m_MainMenuButton;
+    private Button m_PauseQuitButton;
+
+    private bool m_IsPaused;
+    public bool IsPaused => m_IsPaused;
+
     void UpdateCameraSize()
     {
         float size = Mathf.Max(BoardManager.Width, BoardManager.Height) * 0.6f;
@@ -62,6 +71,40 @@ public class GameManager : MonoBehaviour
         return baseEnemies + (m_CurrentLevel * enemyIncreasePerLevel);
     }
 
+    void Update()
+    {
+       if (Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            if (m_MainMenu.style.display == DisplayStyle.Flex)
+                return; // don't pause in main menu
+
+            if (m_IsPaused)
+                ResumeGame();
+            else
+                PauseGame();
+        }
+    }
+
+    void PauseGame()
+    {
+        m_IsPaused = true;
+
+        m_PauseMenu.style.display = DisplayStyle.Flex;
+        m_HUD.style.display = DisplayStyle.None;
+
+        Time.timeScale = 0f;
+    }
+
+    void ResumeGame()
+    {
+        m_IsPaused = false;
+
+        m_PauseMenu.style.display = DisplayStyle.None;
+        m_HUD.style.display = DisplayStyle.Flex;
+
+        Time.timeScale = 1f;
+    }
+
    private void Awake()
    {
        if (Instance != null)
@@ -75,30 +118,73 @@ public class GameManager : MonoBehaviour
   
    void Start()
     {
-    TurnManager = new TurnManager();
-    TurnManager.OnTick += OnTurnHappen;
-    
-    m_FoodLabel = UIDoc.rootVisualElement.Q<Label>("FoodLabel");
-    m_StrengthLabel = UIDoc.rootVisualElement.Q<Label>("StrengthLabel");
+        // =========================
+        // UI ROOT
+        // =========================
+        var root = UIDoc.rootVisualElement;
 
-    m_MainMenu = UIDoc.rootVisualElement.Q<VisualElement>("MainMenu");
-    m_StartButton = UIDoc.rootVisualElement.Q<Button>("StartButton");
-    m_QuitButton = UIDoc.rootVisualElement.Q<Button>("QuitButton");
+        m_MainMenu = root.Q<VisualElement>("MainMenu");
+        m_HUD = root.Q<VisualElement>("HUD");
+        m_GameOverPanel = root.Q<VisualElement>("GameOverPanel");
+        m_PauseMenu = root.Q<VisualElement>("PauseMenu");
 
-    PlayerController.OnStatsChanged += UpdateStatsUI;
-    m_StartButton.clicked += OnStartClicked;
-    m_QuitButton.clicked += OnQuitClicked;
-    m_HUD = UIDoc.rootVisualElement.Q<VisualElement>("HUD");
-    UpdateStatsUI();
-    
-    m_GameOverPanel = UIDoc.rootVisualElement.Q<VisualElement>("GameOverPanel");
-    m_GameOverMessage = m_GameOverPanel.Q<Label>("GameOverMessage");
+        if (m_MainMenu == null || m_HUD == null || m_GameOverPanel == null || m_PauseMenu == null)
+        {
+            Debug.LogError("One or more UI panels are missing from UI Document.");
+        }
 
+        // =========================
+        // LABELS
+        // =========================
+        m_FoodLabel = root.Q<Label>("FoodLabel");
+        m_StrengthLabel = root.Q<Label>("StrengthLabel");
+        m_GameOverMessage = m_GameOverPanel.Q<Label>("GameOverMessage");
 
-    //StartNewGame();
-    m_MainMenu.style.display = DisplayStyle.Flex;
-    m_HUD.style.display = DisplayStyle.None;
-    m_GameOverPanel.style.display = DisplayStyle.None;
+        // =========================
+        // BUTTONS (MAIN MENU)
+        // =========================
+        m_StartButton = root.Q<Button>("StartButton");
+        m_QuitButton = root.Q<Button>("QuitButton");
+
+        // =========================
+        // BUTTONS (PAUSE MENU)
+        // =========================
+        m_ResumeButton = m_PauseMenu.Q<Button>("ResumeButton");
+        m_MainMenuButton = m_PauseMenu.Q<Button>("MainMenuButton");
+        m_PauseQuitButton = m_PauseMenu.Q<Button>("PauseQuitButton");
+
+        // =========================
+        // TURN SYSTEM
+        // =========================
+        TurnManager = new TurnManager();
+        TurnManager.OnTick += OnTurnHappen;
+
+        // =========================
+        // EVENTS
+        // =========================
+        PlayerController.OnStatsChanged += UpdateStatsUI;
+
+        m_StartButton.clicked += OnStartClicked;
+        m_QuitButton.clicked += OnQuitClicked;
+
+        m_ResumeButton.clicked += ResumeGame;
+        m_MainMenuButton.clicked += ReturnToMainMenu;
+        m_PauseQuitButton.clicked += OnQuitClicked;
+
+        // =========================
+        // INITIAL UI STATE
+        // =========================
+        m_MainMenu.style.display = DisplayStyle.Flex;
+        m_HUD.style.display = DisplayStyle.None;
+        m_GameOverPanel.style.display = DisplayStyle.None;
+        m_PauseMenu.style.display = DisplayStyle.None;
+
+        Debug.Log($"PauseQuitButton: {m_PauseQuitButton}");
+
+        // =========================
+        // INIT UI VALUES
+        // =========================
+        UpdateStatsUI();
     }
 
     public void NewLevel()
@@ -146,6 +232,16 @@ public class GameManager : MonoBehaviour
         m_StrengthLabel.text = "Strength: " + PlayerController.Strength;
     }
 
+    void ReturnToMainMenu()
+    {
+        ResumeGame(); // unpause first
+
+        m_PauseMenu.style.display = DisplayStyle.None;
+        m_HUD.style.display = DisplayStyle.None;
+        m_GameOverPanel.style.display = DisplayStyle.None;
+
+        m_MainMenu.style.display = DisplayStyle.Flex;
+    }
     public void ChangeFood(int amount)
     {
         m_FoodAmount += amount;

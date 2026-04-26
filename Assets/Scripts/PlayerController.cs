@@ -63,6 +63,11 @@ public class PlayerController : MonoBehaviour
    private void Update()
    {
 
+    if (GameManager.Instance.IsPaused)
+    {
+        return;
+    }
+
     
         if (m_IsGameOver)
         {
@@ -101,6 +106,7 @@ public class PlayerController : MonoBehaviour
             GameManager.Instance.TurnManager.Tick();
             return;
         }
+      
 
        if(hasMoved)
         {
@@ -145,5 +151,7 @@ public class PlayerController : MonoBehaviour
     {
     m_IsGameOver = true;
     }
+
+
 
 }
