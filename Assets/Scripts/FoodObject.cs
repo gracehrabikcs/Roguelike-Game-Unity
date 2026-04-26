@@ -10,5 +10,7 @@ public class FoodObject : CellObject
     
        //increase food
        GameManager.Instance.ChangeFood(AmountGranted);
+
+       AudioManager.instance.PlayPickup();
    }
 }
