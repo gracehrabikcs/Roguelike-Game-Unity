@@ -74,7 +74,8 @@ public class Enemy : CellObject
           || (yDist == 0 && absXDist == 1))
       {
           //we are adjacent to the player, attack!
-        GameManager.Instance.ChangeFood(-Damage);
+        int finalDamage = Mathf.Max(1, Damage - GameManager.Instance.PlayerController.Strength);
+        GameManager.Instance.ChangeFood(-finalDamage);
       }
       else
       {

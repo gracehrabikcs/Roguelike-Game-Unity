@@ -27,6 +27,7 @@ public class BoardManager : MonoBehaviour
    public WallObject WallPrefab;
    public ExitCellObject ExitCellPrefab;
    public Enemy EnemyPrefab;
+   public Weapon WeaponPrefab;
 
     public void Init(int width, int height, int foodCount, int wallCount, int enemyCount)
     {
@@ -85,6 +86,22 @@ public class BoardManager : MonoBehaviour
         Enemy newEnemy = Instantiate(EnemyPrefab);
         newEnemy.Damage = 1 + (GameManager.Instance.GetLevel() / 5);
         AddObject(newEnemy, coord);
+    }
+
+    int weaponCount = Mathf.Max(1, enemyCount / 2);
+
+    for (int i = 0; i < weaponCount; i++)
+    {
+        if (m_EmptyCellsList.Count == 0)
+            break;
+
+        int randomIndex = Random.Range(0, m_EmptyCellsList.Count);
+        Vector2Int coord = m_EmptyCellsList[randomIndex];
+
+        m_EmptyCellsList.RemoveAt(randomIndex);
+
+        Weapon newWeapon = Instantiate(WeaponPrefab);
+        AddObject(newWeapon, coord);
     }
 
     GenerateWall(wallCount);

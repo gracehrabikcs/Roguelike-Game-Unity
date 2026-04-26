@@ -31,7 +31,14 @@ public class GameManager : MonoBehaviour
     public int enemyIncreasePerLevel = 1;
     public int wallIncreasePerLevel = 1;
 
+    private Label m_StrengthLabel;
+
     public Camera MainCamera;
+
+    private VisualElement m_MainMenu;
+    private Button m_StartButton;
+    private Button m_QuitButton;
+    private VisualElement m_HUD;
 
     void UpdateCameraSize()
     {
@@ -72,11 +79,26 @@ public class GameManager : MonoBehaviour
     TurnManager.OnTick += OnTurnHappen;
     
     m_FoodLabel = UIDoc.rootVisualElement.Q<Label>("FoodLabel");
+    m_StrengthLabel = UIDoc.rootVisualElement.Q<Label>("StrengthLabel");
+
+    m_MainMenu = UIDoc.rootVisualElement.Q<VisualElement>("MainMenu");
+    m_StartButton = UIDoc.rootVisualElement.Q<Button>("StartButton");
+    m_QuitButton = UIDoc.rootVisualElement.Q<Button>("QuitButton");
+
+    PlayerController.OnStatsChanged += UpdateStatsUI;
+    m_StartButton.clicked += OnStartClicked;
+    m_QuitButton.clicked += OnQuitClicked;
+    m_HUD = UIDoc.rootVisualElement.Q<VisualElement>("HUD");
+    UpdateStatsUI();
     
     m_GameOverPanel = UIDoc.rootVisualElement.Q<VisualElement>("GameOverPanel");
     m_GameOverMessage = m_GameOverPanel.Q<Label>("GameOverMessage");
 
-    StartNewGame();
+
+    //StartNewGame();
+    m_MainMenu.style.display = DisplayStyle.Flex;
+    m_HUD.style.display = DisplayStyle.None;
+    m_GameOverPanel.style.display = DisplayStyle.None;
     }
 
     public void NewLevel()
@@ -105,6 +127,25 @@ public class GameManager : MonoBehaviour
 
     }
 
+    void OnStartClicked()
+    {
+        m_MainMenu.style.display = DisplayStyle.None;
+        m_HUD.style.display = DisplayStyle.Flex;
+        m_GameOverPanel.style.display = DisplayStyle.None;
+
+        StartNewGame();
+    }
+
+    void OnQuitClicked()
+    {
+        Application.Quit();
+    }
+
+    void UpdateStatsUI()
+    {
+        m_StrengthLabel.text = "Strength: " + PlayerController.Strength;
+    }
+
     public void ChangeFood(int amount)
     {
         m_FoodAmount += amount;
@@ -113,7 +154,8 @@ public class GameManager : MonoBehaviour
         if (m_FoodAmount <= 0)
         {
             PlayerController.GameOver();
-            m_GameOverPanel.style.visibility = Visibility.Visible;
+            m_GameOverPanel.style.display = DisplayStyle.Flex;
+            m_HUD.style.display = DisplayStyle.None;
             m_GameOverMessage.text = "Game Over!\n\nSurvived " + m_CurrentLevel + " days";
         }
 
@@ -121,7 +163,9 @@ public class GameManager : MonoBehaviour
 
     public void StartNewGame()
     {
-    m_GameOverPanel.style.visibility = Visibility.Hidden;
+    //m_GameOverPanel.style.visibility = Visibility.Hidden;
+    m_GameOverPanel.style.display = DisplayStyle.None;
+    m_HUD.style.display = DisplayStyle.Flex;
     
     m_CurrentLevel = 1;
     m_FoodAmount = 20;
@@ -143,6 +187,7 @@ public class GameManager : MonoBehaviour
     //PlayerController.Spawn(BoardManager, new Vector2Int(1,1));
     Vector2Int spawn = new Vector2Int(1, 1);
     PlayerController.Spawn(BoardManager, spawn);
+    UpdateStatsUI();
     UpdateCameraSize();
     }
 

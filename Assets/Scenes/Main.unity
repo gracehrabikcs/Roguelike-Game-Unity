@@ -485,6 +485,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   MoveSpeed: 5
+  Strength: 1
 --- !u!95 &763150877
 Animator:
   serializedVersion: 7
@@ -1568,6 +1569,7 @@ MonoBehaviour:
   WallPrefab: {fileID: 5181462842875405333, guid: a5c9b9fab54d11c46847138ed7fc351d, type: 3}
   ExitCellPrefab: {fileID: 8193077675450792901, guid: 8ddb16aeb532aea43ade12cfc56232b7, type: 3}
   EnemyPrefab: {fileID: 8069756909402756793, guid: 37457a8aec01d12409d2b97d6cd7a94c, type: 3}
+  WeaponPrefab: {fileID: 3987917724259883914, guid: ba2847aeb5f848948b772e4ed71ca9a0, type: 3}
 --- !u!156049354 &1910475497
 Grid:
   m_ObjectHideFlags: 0

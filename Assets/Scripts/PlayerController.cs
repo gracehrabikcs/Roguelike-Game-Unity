@@ -11,8 +11,10 @@ public class PlayerController : MonoBehaviour
    private Vector3 m_MoveTarget;
     public float MoveSpeed = 5f;
     private bool m_IsMoving;
+    public int Strength = 1;
 
     public Vector2Int Cell => m_CellPosition;
+    public System.Action OnStatsChanged;
 
 
 
@@ -22,6 +24,12 @@ public class PlayerController : MonoBehaviour
        MoveTo(cell, true);
    }
   
+
+    public void AddStrength(int amount)
+    {
+        Strength += amount;
+        OnStatsChanged?.Invoke();
+    }
     public void MoveTo(Vector2Int cell, bool immediate)
    {
        m_CellPosition = cell;
@@ -88,6 +96,11 @@ public class PlayerController : MonoBehaviour
            newCellTarget.x -= 1;
            hasMoved = true;
        }
+       else if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            GameManager.Instance.TurnManager.Tick();
+            return;
+        }
 
        if(hasMoved)
         {
