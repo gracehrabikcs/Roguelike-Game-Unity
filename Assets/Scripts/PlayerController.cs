@@ -5,7 +5,7 @@ public class PlayerController : MonoBehaviour
 {
    private BoardManager m_Board;
    private Vector2Int m_CellPosition;
-   private bool m_IsGameOver;
+   //private bool m_IsGameOver;
    private Animator m_Animator;
 
    private Vector3 m_MoveTarget;
@@ -50,7 +50,8 @@ public class PlayerController : MonoBehaviour
 
    public void Init()
     {
-    m_IsGameOver = false;
+        m_IsMoving = false;
+        //m_IsGameOver = false;
     }
 
     private void Awake()
@@ -63,21 +64,31 @@ public class PlayerController : MonoBehaviour
    private void Update()
    {
 
-    if (GameManager.Instance.IsPaused)
+    if (GameManager.Instance.IsGameOver)
     {
+        if (Keyboard.current.enterKey.wasPressedThisFrame)
+        {
+            GameManager.Instance.StartNewGame();
+        }
+
         return;
     }
 
     
-        if (m_IsGameOver)
-        {
-            if (Keyboard.current.enterKey.wasPressedThisFrame)
-            {
-                GameManager.Instance.StartNewGame();
-            }
+        // if (m_IsGameOver)
+        // {
+        //     if (Keyboard.current.enterKey.wasPressedThisFrame)
+        //     {
+        //         GameManager.Instance.StartNewGame();
+        //     }
 
-            return;
-        }
+        //     return;
+        // }
+
+        if (GameManager.Instance.IsPaused)
+    {
+        return;
+    }
        Vector2Int newCellTarget = m_CellPosition;
        bool hasMoved = false;
 
@@ -149,7 +160,7 @@ public class PlayerController : MonoBehaviour
 
    public void GameOver()
     {
-    m_IsGameOver = true;
+    //m_IsGameOver = true;
     }
 
 

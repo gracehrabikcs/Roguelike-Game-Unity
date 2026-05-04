@@ -46,7 +46,7 @@ public class GameManager : MonoBehaviour
     private Button m_MainMenuButton;
     private Button m_PauseQuitButton;
     private Label m_LevelLabel;
-
+    public bool IsGameOver { get; private set; }
     private bool m_IsPaused;
     public bool IsPaused => m_IsPaused;
 
@@ -59,17 +59,17 @@ public class GameManager : MonoBehaviour
 
     public int GetFoodCount()
     {
-        return Mathf.Max(1, baseFood - (m_CurrentLevel * foodDecreasePerLevel));
+        return Mathf.Max(1, baseFood - ((m_CurrentLevel - 1) * foodDecreasePerLevel));
     }
 
     public int GetWallCount()
     {
-        return baseWalls + (m_CurrentLevel * wallIncreasePerLevel);
+        return baseWalls + ((m_CurrentLevel - 1) * wallIncreasePerLevel);
     }
 
     public int GetEnemyCount()
     {
-        return baseEnemies + (m_CurrentLevel * enemyIncreasePerLevel);
+        return baseEnemies + ((m_CurrentLevel - 1) * enemyIncreasePerLevel);
     }
 
     void Update()
@@ -181,6 +181,16 @@ public class GameManager : MonoBehaviour
         m_GameOverPanel.style.display = DisplayStyle.None;
         m_PauseMenu.style.display = DisplayStyle.None;
 
+        Debug.Log("HUD: " + m_HUD);
+        Debug.Log("GameOverPanel: " + m_GameOverPanel);
+        Debug.Log("GameOverMessage: " + m_GameOverMessage);
+
+        if (m_GameOverPanel == null)
+        {
+            Debug.LogError("GameOverPanel not found in UI Document!");
+            return;
+        }
+
         Debug.Log($"PauseQuitButton: {m_PauseQuitButton}");
 
         // =========================
@@ -191,29 +201,34 @@ public class GameManager : MonoBehaviour
 
     public void NewLevel()
     {
-    BoardManager.Clean();
-    int width = baseWidth + (m_CurrentLevel * sizeIncreasePerLevel);
-    int height = baseHeight + (m_CurrentLevel * sizeIncreasePerLevel);
+        m_CurrentLevel++;
 
-    BoardManager.Init(
-        width,
-        height,
-        GetFoodCount(),
-        GetWallCount(),
-        GetEnemyCount()
-    );
-    PlayerController.Spawn(BoardManager, new Vector2Int(1,1));
+        BoardManager.Clean();
 
-    m_CurrentLevel++;
-    UpdateLevelUI();
-    UpdateCameraSize();
+        int width = baseWidth + ((m_CurrentLevel - 1) * sizeIncreasePerLevel);
+        int height = baseHeight + ((m_CurrentLevel - 1) * sizeIncreasePerLevel);
+
+        BoardManager.Init(
+            width,
+            height,
+            GetFoodCount(),
+            GetWallCount(),
+            GetEnemyCount()
+        );
+
+        PlayerController.Spawn(BoardManager, new Vector2Int(1,1));
+
+        UpdateLevelUI();
+        UpdateCameraSize();
     }
    void OnTurnHappen()
     {
-        // m_FoodAmount -= 1;
-        // m_FoodLabel.text = "Food : " + m_FoodAmount;
-        ChangeFood(-1);
+        if (IsGameOver)
+            return;
+        if (PlayerController == null)
+        return;
 
+        ChangeFood(-1);
     }
 
     void OnStartClicked()
@@ -251,23 +266,64 @@ public class GameManager : MonoBehaviour
 
         m_MainMenu.style.display = DisplayStyle.Flex;
     }
+    // public void ChangeFood(int amount)
+    // {
+    //     m_FoodAmount += amount;
+    //     m_FoodLabel.text = "Food : " + m_FoodAmount;
+
+    //     if (m_FoodAmount <= 0)
+    //     {
+    //         PlayerController.GameOver();
+    //         m_GameOverPanel.style.display = DisplayStyle.Flex;
+    //         m_HUD.style.display = DisplayStyle.None;
+    //         m_GameOverMessage.text = "Game Over!\n\nSurvived " + m_CurrentLevel + " days";
+    //     }
+
+    // }
+
     public void ChangeFood(int amount)
     {
+        if (IsGameOver)
+            return;
+
         m_FoodAmount += amount;
-        m_FoodLabel.text = "Food : " + m_FoodAmount;
+
+        if (m_FoodLabel != null)
+            m_FoodLabel.text = "Food : " + m_FoodAmount;
 
         if (m_FoodAmount <= 0)
         {
-            PlayerController.GameOver();
-            m_GameOverPanel.style.display = DisplayStyle.Flex;
-            m_HUD.style.display = DisplayStyle.None;
-            m_GameOverMessage.text = "Game Over!\n\nSurvived " + m_CurrentLevel + " days";
+            GameOver();
         }
+    }
 
+    public void GameOver()
+    {
+        if (IsGameOver) return;
+        IsGameOver = true;
+
+        PlayerController.GameOver();
+
+        if (m_GameOverPanel != null)
+            m_GameOverPanel.style.display = DisplayStyle.Flex;
+
+        if (m_HUD != null)
+            m_HUD.style.display = DisplayStyle.None;
+
+        if (m_GameOverMessage != null)
+            m_GameOverMessage.text =
+                "Game Over!\n\nSurvived " + m_CurrentLevel + " days";
+
+        if (TurnManager != null)
+            TurnManager.OnTick -= OnTurnHappen;
     }
 
     public void StartNewGame()
     {
+        IsGameOver = false;
+
+        TurnManager.OnTick -= OnTurnHappen;
+        TurnManager.OnTick += OnTurnHappen;
     //m_GameOverPanel.style.visibility = Visibility.Hidden;
     m_GameOverPanel.style.display = DisplayStyle.None;
     m_HUD.style.display = DisplayStyle.Flex;
@@ -277,8 +333,8 @@ public class GameManager : MonoBehaviour
     m_FoodLabel.text = "Food : " + m_FoodAmount;
     
     BoardManager.Clean();
-    int width = baseWidth + (m_CurrentLevel * sizeIncreasePerLevel);
-    int height = baseHeight + (m_CurrentLevel * sizeIncreasePerLevel);
+    int width = baseWidth + ((m_CurrentLevel - 1) * sizeIncreasePerLevel);
+    int height = baseHeight + ((m_CurrentLevel - 1) * sizeIncreasePerLevel);
 
     BoardManager.Init(
         width,
@@ -292,6 +348,8 @@ public class GameManager : MonoBehaviour
     //PlayerController.Spawn(BoardManager, new Vector2Int(1,1));
     Vector2Int spawn = new Vector2Int(1, 1);
     PlayerController.Spawn(BoardManager, spawn);
+
+
     UpdateLevelUI();
     UpdateStatsUI();
     UpdateCameraSize();
