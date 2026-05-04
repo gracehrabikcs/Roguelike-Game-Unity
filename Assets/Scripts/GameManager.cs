@@ -38,13 +38,13 @@ public class GameManager : MonoBehaviour
 
     private VisualElement m_MainMenu;
     private Button m_StartButton;
-    private Button m_QuitButton;
+    //private Button m_QuitButton;
     private VisualElement m_HUD;
 
     private VisualElement m_PauseMenu;
     private Button m_ResumeButton;
     private Button m_MainMenuButton;
-    private Button m_PauseQuitButton;
+    //private Button m_PauseQuitButton;
     private Label m_LevelLabel;
     public bool IsGameOver { get; private set; }
     private bool m_IsPaused;
@@ -146,14 +146,14 @@ public class GameManager : MonoBehaviour
         // BUTTONS (MAIN MENU)
         // =========================
         m_StartButton = root.Q<Button>("StartButton");
-        m_QuitButton = root.Q<Button>("QuitButton");
+        //m_QuitButton = root.Q<Button>("QuitButton");
 
         // =========================
         // BUTTONS (PAUSE MENU)
         // =========================
         m_ResumeButton = m_PauseMenu.Q<Button>("ResumeButton");
         m_MainMenuButton = m_PauseMenu.Q<Button>("MainMenuButton");
-        m_PauseQuitButton = m_PauseMenu.Q<Button>("PauseQuitButton");
+        //m_PauseQuitButton = m_PauseMenu.Q<Button>("PauseQuitButton");
 
         // =========================
         // TURN SYSTEM
@@ -167,11 +167,11 @@ public class GameManager : MonoBehaviour
         PlayerController.OnStatsChanged += UpdateStatsUI;
 
         m_StartButton.clicked += OnStartClicked;
-        m_QuitButton.clicked += OnQuitClicked;
+        //m_QuitButton.clicked += OnQuitClicked;
 
         m_ResumeButton.clicked += ResumeGame;
         m_MainMenuButton.clicked += ReturnToMainMenu;
-        m_PauseQuitButton.clicked += OnQuitClicked;
+        //m_PauseQuitButton.clicked += OnQuitClicked;
 
         // =========================
         // INITIAL UI STATE
@@ -191,7 +191,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"PauseQuitButton: {m_PauseQuitButton}");
+        //Debug.Log($"PauseQuitButton: {m_PauseQuitButton}");
 
         // =========================
         // INIT UI VALUES
@@ -246,10 +246,10 @@ public class GameManager : MonoBehaviour
             m_LevelLabel.text = "Level: " + m_CurrentLevel;
     }
 
-    void OnQuitClicked()
-    {
-        Application.Quit();
-    }
+    // void OnQuitClicked()
+    // {
+    //     Application.Quit();
+    // }
 
     void UpdateStatsUI()
     {
