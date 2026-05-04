@@ -24,16 +24,16 @@ public class Enemy : CellObject
    }
 
    public override bool PlayerWantsToEnter()
-   {
-       m_CurrentHealth -= 1;
+    {
+        m_CurrentHealth -= GameManager.Instance.PlayerController.Strength;
 
-       if (m_CurrentHealth <= 0)
-       {
-          Destroy(gameObject);
-       }
+        if (m_CurrentHealth <= 0)
+        {
+            Destroy(gameObject);
+        }
 
-       return false;
-   }
+        return false;
+    }
 
    bool MoveTo(Vector2Int coord)
    {

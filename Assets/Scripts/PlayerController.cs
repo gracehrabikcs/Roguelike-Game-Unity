@@ -51,7 +51,8 @@ public class PlayerController : MonoBehaviour
    public void Init()
     {
         m_IsMoving = false;
-        //m_IsGameOver = false;
+        Strength = 1;
+        OnStatsChanged?.Invoke();
     }
 
     private void Awake()
